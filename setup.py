@@ -17,7 +17,7 @@ from setuptools import find_packages, setup
 
 # Determine package version robustly. Accept optional CLI arg `version=x.y.z` for CI flows,
 # otherwise default to a package pre-release indicating Cantonese additions.
-version = "1.0.4-yue"
+version = "1.0.4+yue"
 try:
     # Look for an explicit 'version=...' argument and remove it from argv when present.
     for i, arg in enumerate(sys.argv[1:], start=1):
