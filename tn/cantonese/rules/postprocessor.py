@@ -77,6 +77,9 @@ class PostProcessor(Processor):
         for d in ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"]:
             processor @= self.build_rule(cross("點" + d + "蚊", "個" + d))
 
+        # Time-specific shorthand: convert '點三十分' to '點半' (e.g., 12:30 -> 十二點半)
+        processor @= self.build_rule(cross("點三十分", "點半"))
+
         if tag_oov:
             charset = (
                 zh_charset_std

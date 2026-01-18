@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from pynini import string_file
+from pynini import string_file, cross
 from pynini.lib.pynutil import delete, insert
 
 from tn.processor import Processor
@@ -54,6 +54,8 @@ class Time(Processor):
         noon = delete('noon: "') + self.SIGMA + delete('" ')
         hour = delete('hour: "') + self.SIGMA + delete('" ')
         minute = delete('minute: "') + self.SIGMA + delete('"')
+        # Prefer half-hour shorthand: replace '三十分' with '半' for times like 12:30 -> 十二點半
+        minute_half = delete('minute: "') + cross("三十分", "半") + delete('"')
         second = delete(' second: "') + self.SIGMA + delete('"')
-        verbalizer = noon.ques + hour + minute + second.ques
+        verbalizer = noon.ques + hour + (minute_half | minute) + second.ques
         self.verbalizer = self.delete_tokens(verbalizer)
