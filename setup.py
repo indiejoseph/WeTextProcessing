@@ -32,17 +32,27 @@ setup(
     url="https://github.com/wenet-e2e/WeTextProcessing",
     packages=find_packages(),
     package_data={
-        "tn": ["*.fst", "chinese/data/*/*.tsv", "english/data/*/*.tsv", "english/data/*.tsv", "english/data/*/*.far"],
+        "tn": [
+            "*.fst",
+            "chinese/data/*/*.tsv",
+            "english/data/*/*.tsv",
+            "english/data/*.tsv",
+            "english/data/*/*.far",
+        ],
         "itn": ["*.fst", "chinese/data/*/*.tsv"],
     },
     install_requires=["pynini==2.1.6", "importlib_resources"],
+    # Optional extras for additional features; e.g., Cantonese simplified->traditional conversion
+    extras_require={
+        "cantonese": ["opencc-python-reimplemented"],
+    },
     entry_points={
         "console_scripts": [
             "wetn = tn.main:main",
             "weitn = itn.main:main",
         ]
     },
-    tests_require=["pytest"],
+    tests_require=["pytest", "opencc-python-reimplemented"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",

@@ -31,6 +31,16 @@ wetn --text "2.5平方电线"
 weitn --text "二点五平方电线"
 ```
 
+# Cantonese command-line example (use python -c to invoke the Cantonese normalizer)
+```bash
+python -c "from tn.cantonese.normalizer import Normalizer; print(Normalizer(overwrite_cache=True, simple_to_traditional=True).normalize('价格是HKD13.5'))"  # -> 價格是十三個半
+```
+
+# Cantonese CLI example via `wetn` (now supported)
+```bash
+wetn --language yue --text "价格是HKD13.5"  # -> 價格是十三個半
+```
+
 Python usage:
 
 ```py
@@ -57,6 +67,12 @@ en_tn_model = EnNormalizer(overwrite_cache=False)
 print("中文 TN (复用之前编译好的图):\n\t{} => {}".format(zh_tn_text, zh_tn_model.normalize(zh_tn_text)))
 print("中文ITN (复用之前编译好的图):\n\t{} => {}".format(zh_itn_text, zh_itn_model.normalize(zh_itn_text)))
 print("英文 TN (复用之前编译好的图):\n\t{} => {}\n".format(en_tn_text, en_tn_model.normalize(en_tn_text)))
+
+# Cantonese usage example
+from tn.cantonese.normalizer import Normalizer as YueNormalizer
+# simple_to_traditional=True enables OpenCC s2hk conversion for Cantonese-preferred variants
+yue = YueNormalizer(overwrite_cache=False, simple_to_traditional=True)
+print("粵語 TN example:\n\t{} => {}".format("价格是HKD13.5", yue.normalize("价格是HKD13.5")))  # -> 價格是十三個半
 
 zh_tn_model = ZhNormalizer(remove_erhua=False, overwrite_cache=True)
 zh_itn_model = InverseNormalizer(enable_0_to_9=True, overwrite_cache=True)

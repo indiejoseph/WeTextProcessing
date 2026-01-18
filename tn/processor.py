@@ -16,7 +16,21 @@ import logging
 import os
 import string
 
-from pynini import Fst, cdrewrite, cross, difference, escape, invert, shortestpath, union
+try:
+    from opencc import OpenCC
+except Exception:
+    OpenCC = None
+
+from pynini import (
+    Fst,
+    cdrewrite,
+    cross,
+    difference,
+    escape,
+    invert,
+    shortestpath,
+    union,
+)
 from pynini.lib import byte, utf8
 from pynini.lib.pynutil import delete, insert
 
@@ -29,7 +43,7 @@ class Processor:
         self.ALPHA = byte.ALPHA
         self.DIGIT = byte.DIGIT
         self.PUNCT = byte.PUNCT
-        self.SPACE = byte.SPACE | "\u00A0"
+        self.SPACE = byte.SPACE | "\u00a0"
         self.VCHAR = utf8.VALID_UTF8_CHAR
         self.VSIGMA = self.VCHAR.star
         self.LOWER = byte.LOWER
@@ -45,13 +59,25 @@ class Processor:
         self.DELETE_EXTRA_SPACE = cross(self.SPACE.plus, " ")
         self.DELETE_ZERO_OR_ONE_SPACE = delete(self.SPACE.ques)
         self.MIN_NEG_WEIGHT = -0.0001
-        self.TO_LOWER = union(*[cross(x, y) for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)])
+        self.TO_LOWER = union(
+            *[
+                cross(x, y)
+                for x, y in zip(string.ascii_uppercase, string.ascii_lowercase)
+            ]
+        )
         self.TO_UPPER = invert(self.TO_LOWER)
 
         self.name = name
         self.ordertype = ordertype
         self.tagger = None
         self.verbalizer = None
+        # optional OpenCC instance for subclasses that want
+        # simplified->traditional conversion
+        if OpenCC is not None:
+            # use s2hk (Simplified->Traditional - Hong Kong) for Cantonese preference
+            self._s2t = OpenCC("s2hk")
+        else:
+            self._s2t = None
 
     def build_rule(self, fst, l="", r=""):
         rule = cdrewrite(fst, l, r, self.VSIGMA)
@@ -62,7 +88,13 @@ class Processor:
         return tagger.optimize()
 
     def delete_tokens(self, verbalizer):
-        verbalizer = delete(f"{self.name}") + delete(" { ") + verbalizer + delete(" }") + delete(" ").ques
+        verbalizer = (
+            delete(f"{self.name}")
+            + delete(" { ")
+            + verbalizer
+            + delete(" }")
+            + delete(" ").ques
+        )
         return verbalizer.optimize()
 
     def build_verbalizer(self):
@@ -104,6 +136,9 @@ class Processor:
     def tag(self, input):
         if len(input) == 0:
             return ""
+        # allow rule-level classes to opt-in to simplified->traditional conversion
+        if getattr(self, "simple_to_traditional", False) and self._s2t is not None:
+            input = self._s2t.convert(input)
         input = escape(input)
         lattice = input @ self.tagger
         return shortestpath(lattice, nshortest=1, unique=True).string()

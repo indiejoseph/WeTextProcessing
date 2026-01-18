@@ -42,3 +42,5 @@ build/
 dist/
 tn/*.far
 itn/*.far
+
+.venv
