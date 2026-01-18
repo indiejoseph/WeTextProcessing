@@ -15,8 +15,20 @@ import sys
 
 from setuptools import find_packages, setup
 
-version = sys.argv[-1].split("=")[1]
-sys.argv = sys.argv[0 : len(sys.argv) - 1]
+# Determine package version robustly. Accept optional CLI arg `version=x.y.z` for CI flows,
+# otherwise default to a package pre-release indicating Cantonese additions.
+version = "1.0.4-yue"
+try:
+    # Look for an explicit 'version=...' argument and remove it from argv when present.
+    for i, arg in enumerate(sys.argv[1:], start=1):
+        if isinstance(arg, str) and arg.startswith("version="):
+            version = arg.split("=", 1)[1]
+            # remove the version arg so setuptools doesn't choke on it
+            del sys.argv[i]
+            break
+except Exception:
+    # If anything goes wrong, fall back to the default version above
+    version = version
 
 with open("README.md", "r", encoding="utf8") as fh:
     long_description = fh.read()
@@ -38,6 +50,9 @@ setup(
             "english/data/*/*.tsv",
             "english/data/*.tsv",
             "english/data/*/*.far",
+            # Cantonese language data
+            "cantonese/data/*/*.tsv",
+            "cantonese/data/*.tsv",
         ],
         "itn": ["*.fst", "chinese/data/*/*.tsv"],
     },

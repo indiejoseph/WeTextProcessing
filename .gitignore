@@ -44,3 +44,5 @@ tn/*.far
 itn/*.far
 
 .venv
+
+*.ipynb
